@@ -7,7 +7,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
 
         while (true) {
-            System.out.println("Introduce una expresión (escribe 'salir' para finalizar el código):");
+            System.out.println("Introduce una expresión (escribe 'salir' para finalizar el código).:");
             System.out.print("→  ");
             String expresion = scanner.nextLine();
 
