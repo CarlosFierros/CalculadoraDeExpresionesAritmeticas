@@ -5,28 +5,64 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
+
         while (true) {
-            System.out.println("Introduce una expresión (escribe 'salir' para finalizar el codigo):");
-            System.out.print("> ");
+            System.out.println("Introduce una expresión (escribe 'salir' para finalizar el código):");
+            System.out.print("→  ");
             String expresion = scanner.nextLine();
 
-            if (expresion.equals("salir")) {
+            if (expresion.equalsIgnoreCase("salir")) {
                 break;
             }
-            // Obtener los tokens (números y operadores separados)
-            List<String> tokens = obtenerTokens(expresion);
-            System.out.println("Expresión en tokens: " + tokens);
 
-            // Convertir a notación postfija
-            List<String> postfija = convertirAPostfija(tokens);
-            System.out.println("Expresión postfija: " + postfija);
+            try {
+                // Verificar si los paréntesis están balanceados
+                if (!parentesisBalanceados(expresion)) {
+                    throw new Exception("Error: Los paréntesis no están balanceados.");
+                }
 
-            // Evaluar la expresión postfija
-            double resultado = evaluarPostfija(postfija);
-            System.out.println("Resultado: " + resultado);
+                // Obtener los tokens (números y operadores separados)
+                List<String> tokens = obtenerTokens(expresion);
+                System.out.println("Expresión en tokens: " + tokens);
+
+                // Convertir a notación postfija
+                List<String> postfija = convertirAPostfija(tokens);
+                System.out.println("Expresión postfija: " + postfija);
+
+                // Evaluar la expresión postfija
+                double resultado = evaluarPostfija(postfija);
+                System.out.println("Resultado: " + resultado);
+
+            } catch (EmptyStackException e) {
+                System.out.println("Error: La expresión ingresada es inválida.");
+            } catch (ArithmeticException e) {
+                System.out.println("Error: Ocurrió un problema con una operación aritmética (posible división por cero).");
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
         }
+
         scanner.close();  // Cerrar el Scanner al final
     }
+
+    // Método para verificar si los paréntesis están balanceados
+    public static boolean parentesisBalanceados(String expresion) {
+        int balance = 0;
+        for (char c : expresion.toCharArray()) {
+            if (c == '(') {
+                balance++;
+            } else if (c == ')') {
+                balance--;
+            }
+            // Si en algún momento hay más paréntesis de cierre que de apertura, no está balanceado
+            if (balance < 0) {
+                return false;
+            }
+        }
+        // Al final, el balance debe ser 0 (mismos paréntesis de apertura que de cierre)
+        return balance == 0;
+    }
+
     // Ver si es un operador (+, -, *, /, ^)
     public static boolean esOperador(String token) {
         return token.equals("+") || token.equals("-") ||
@@ -53,9 +89,9 @@ public class Main {
 
         for (String token : tokens) {
             if (esNumero(token)) {
-                salida.add(token);  //
+                salida.add(token);
             } else if (esOperador(token)) {
-                while (!pila.isEmpty() && precedencia(pila.peek()) >= precedencia(token)) {
+                while (!pila.isEmpty() && precedenciaOperador(pila.peek()) >= precedenciaOperador(token)) {
                     salida.add(pila.pop());
                 }
                 pila.push(token);
@@ -68,7 +104,6 @@ public class Main {
                 pila.pop();
             }
         }
-
 
         while (!pila.isEmpty()) {
             salida.add(pila.pop());
@@ -88,7 +123,7 @@ public class Main {
     }
 
     // Obtener la precedencia de los operadores
-    public static int precedencia(String operador) {
+    public static int precedenciaOperador(String operador) {
         switch (operador) {
             case "^": return 3;
             case "*":
